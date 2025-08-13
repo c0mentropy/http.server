@@ -1,4 +1,3 @@
-```markdown
 # FILE CLI
 
 `filecli` is a simple file transfer tool developed in Go. It can function both as a file server and as a client for uploading and downloading files. It provides both command-line and web interfaces for convenient use in different scenarios.
