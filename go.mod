@@ -1,3 +1,3 @@
-module http.server
+module filecli
 
 go 1.23.4
