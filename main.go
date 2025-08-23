@@ -80,7 +80,7 @@ func uploadHandler(root string) http.HandlerFunc {
 
 		// 构建目标路径
 		destPath := filepath.Join(root, destName)
-		
+
 		// 创建目标文件
 		dst, err := os.Create(destPath)
 		if err != nil {
@@ -101,12 +101,12 @@ func uploadHandler(root string) http.HandlerFunc {
 
 // 提供文件上传表单
 func uploadFormHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodGet {
-        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-    html := `
+	html := `
     <!DOCTYPE html>
     <html>
     <head>
@@ -142,8 +142,8 @@ func uploadFormHandler(w http.ResponseWriter, r *http.Request) {
     </html>
     `
 
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    fmt.Fprint(w, html)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, html)
 }
 
 func startServer(bind string, port int, dir string, proto string) {
@@ -206,9 +206,9 @@ func clientDownload(serverAddr, sourcePath, destPath string) error {
 	if !strings.HasPrefix(sourcePath, "/") {
 		sourcePath = "/" + sourcePath
 	}
-	
+
 	url := fmt.Sprintf("http://%s%s", serverAddr, sourcePath)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Unable to connect to server: %v", err)
@@ -254,30 +254,30 @@ func clientUpload(serverAddr, sourcePath, destPath string) error {
 	// 创建multipart表单
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
-	
+
 	// 创建表单文件字段
 	part, err := writer.CreateFormFile("file", filepath.Base(sourcePath))
 	if err != nil {
 		return fmt.Errorf("Failed to create form: %v", err)
 	}
-	
+
 	// 将文件内容复制到表单
 	if _, err := io.Copy(part, file); err != nil {
 		return fmt.Errorf("Failed to read file contents: %v", err)
 	}
-	
+
 	// 添加目标路径字段
 	if destPath != "" {
 		if err := writer.WriteField("dest", destPath); err != nil {
 			return fmt.Errorf("Failed to set target path: %v", err)
 		}
 	}
-	
+
 	// 关闭multipart writer
 	if err := writer.Close(); err != nil {
 		return fmt.Errorf("Failed to close form: %v", err)
 	}
-	
+
 	// 发送POST请求
 	url := fmt.Sprintf("http://%s/upload", serverAddr)
 	req, err := http.NewRequest("POST", url, &requestBody)
@@ -285,19 +285,19 @@ func clientUpload(serverAddr, sourcePath, destPath string) error {
 		return fmt.Errorf("Create request failed: %v", err)
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Sending request failed: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("Server returns error: %s - %s", resp.Status, string(body))
 	}
-	
+
 	fmt.Println("File uploaded successfully")
 	return nil
 }
@@ -317,25 +317,25 @@ func printUsage() {
 }
 
 func printServerUsage() {
-    // 使用标准输出打印帮助信息
-    w := os.Stdout
-    fmt.Fprintf(w, "Usage: %s [options] [port]\n\n", filename)
-    fmt.Fprintf(w, "Options:\n")
-    
-    fmt.Fprintf(w, "  -b string\n")
-    fmt.Fprintf(w, "        bind to this address (default all interfaces)\n")
-    fmt.Fprintf(w, "  -bind string\n")
-    fmt.Fprintf(w, "        bind to this address (default all interfaces)\n")
-    fmt.Fprintf(w, "  -d string\n")
-    fmt.Fprintf(w, "        serve this directory (default current directory) (default \".\")\n")
-    fmt.Fprintf(w, "  -directory string\n")
-    fmt.Fprintf(w, "        serve this directory (default current directory) (default \".\")\n")
-    fmt.Fprintf(w, "  -p string\n")
-    fmt.Fprintf(w, "        HTTP protocol version to use (HTTP/1.0 or HTTP/1.1) (default \"HTTP/1.0\")\n")
-    fmt.Fprintf(w, "  -protocol string\n")
-    fmt.Fprintf(w, "        HTTP protocol version to use (HTTP/1.0 or HTTP/1.1) (default \"HTTP/1.0\")\n")
-    
-    fmt.Fprintf(w, "\nPositional arguments:\n  port\t\tport number to listen on (default 8000)\n")
+	// 使用标准输出打印帮助信息
+	w := os.Stdout
+	fmt.Fprintf(w, "Usage: %s [options] [port]\n\n", filename)
+	fmt.Fprintf(w, "Options:\n")
+
+	fmt.Fprintf(w, "  -b string\n")
+	fmt.Fprintf(w, "        bind to this address (default all interfaces)\n")
+	fmt.Fprintf(w, "  -bind string\n")
+	fmt.Fprintf(w, "        bind to this address (default all interfaces)\n")
+	fmt.Fprintf(w, "  -d string\n")
+	fmt.Fprintf(w, "        serve this directory (default current directory) (default \".\")\n")
+	fmt.Fprintf(w, "  -directory string\n")
+	fmt.Fprintf(w, "        serve this directory (default current directory) (default \".\")\n")
+	fmt.Fprintf(w, "  -p string\n")
+	fmt.Fprintf(w, "        HTTP protocol version to use (HTTP/1.0 or HTTP/1.1) (default \"HTTP/1.0\")\n")
+	fmt.Fprintf(w, "  -protocol string\n")
+	fmt.Fprintf(w, "        HTTP protocol version to use (HTTP/1.0 or HTTP/1.1) (default \"HTTP/1.0\")\n")
+
+	fmt.Fprintf(w, "\nPositional arguments:\n  port\t\tport number to listen on (default 8000)\n")
 }
 
 func printUploadUsage() {
@@ -356,7 +356,7 @@ func printDownloadUsage() {
 	fmt.Println("  -l, --lfile string    Local save path (optional, defaults to the same as the remote file name)")
 }
 
-const version = "v0.1.1"
+const version = "v0.1.2"
 const author = "Ckyan Comentropy"
 const email = "comentropy@foxmail.com"
 const github = "https://github.com/c0mentropy/filecli"
@@ -395,7 +395,7 @@ func handleServerCommand(args []string) {
 
 	// 创建新的flag集，处理服务器参数
 	serverFlagSet := flag.NewFlagSet("server", flag.ExitOnError)
-	
+
 	// 定义服务器参数
 	bindShort := serverFlagSet.String("b", "", "bind to this address (default all interfaces)")
 	bindLong := serverFlagSet.String("bind", "", "bind to this address (default all interfaces)")
@@ -431,27 +431,27 @@ func handleServerCommand(args []string) {
 func handleUploadCommand(args []string) {
 	// 创建上传命令的flag集
 	uploadFlagSet := flag.NewFlagSet("upload", flag.ExitOnError)
-	
+
 	// 定义上传参数
 	serverShort := uploadFlagSet.String("s", "", "")
 	serverLong := uploadFlagSet.String("server", "", "")
-	
+
 	portShort := uploadFlagSet.Int("p", 0, "")
 	portLong := uploadFlagSet.Int("port", 0, "")
-	
+
 	lfileShort := uploadFlagSet.String("l", "", "")
 	lfileLong := uploadFlagSet.String("lfile", "", "")
-	
+
 	rfileShort := uploadFlagSet.String("r", "", "")
 	rfileLong := uploadFlagSet.String("rfile", "", "")
-	
+
 	uploadFlagSet.Usage = printUploadUsage
-	
+
 	// 解析参数
 	if err := uploadFlagSet.Parse(args); err != nil {
 		log.Fatalf("Parameter parsing error: %v", err)
 	}
-	
+
 	// 解析参数值
 	server := resolveParam("s", "server", *serverShort, *serverLong, "")
 	port := *portShort
@@ -460,7 +460,7 @@ func handleUploadCommand(args []string) {
 	}
 	lfile := resolveParam("l", "lfile", *lfileShort, *lfileLong, "")
 	rfile := resolveParam("r", "rfile", *rfileShort, *rfileLong, "")
-	
+
 	// 验证必填参数
 	if server == "" {
 		log.Fatal("Please specify the server address (-s or --server)")
@@ -471,10 +471,10 @@ func handleUploadCommand(args []string) {
 	if lfile == "" {
 		log.Fatal("Please specify a local file path (-l or --lfile)")
 	}
-	
+
 	// 构建服务器地址
 	serverAddr := fmt.Sprintf("%s:%d", server, port)
-	
+
 	// 执行上传
 	if err := clientUpload(serverAddr, lfile, rfile); err != nil {
 		log.Fatalf("Upload failed: %v", err)
@@ -484,27 +484,27 @@ func handleUploadCommand(args []string) {
 func handleDownloadCommand(args []string) {
 	// 创建下载命令的flag集
 	downloadFlagSet := flag.NewFlagSet("download", flag.ExitOnError)
-	
+
 	// 定义下载参数
 	serverShort := downloadFlagSet.String("s", "", "")
 	serverLong := downloadFlagSet.String("server", "", "")
-	
+
 	portShort := downloadFlagSet.Int("p", 0, "")
 	portLong := downloadFlagSet.Int("port", 0, "")
-	
+
 	rfileShort := downloadFlagSet.String("r", "", "")
 	rfileLong := downloadFlagSet.String("rfile", "", "")
-	
+
 	lfileShort := downloadFlagSet.String("l", "", "")
 	lfileLong := downloadFlagSet.String("lfile", "", "")
-	
+
 	downloadFlagSet.Usage = printDownloadUsage
-	
+
 	// 解析参数
 	if err := downloadFlagSet.Parse(args); err != nil {
 		log.Fatalf("Parameter parsing error: %v", err)
 	}
-	
+
 	// 解析参数值
 	server := resolveParam("s", "server", *serverShort, *serverLong, "")
 	port := *portShort
@@ -513,7 +513,7 @@ func handleDownloadCommand(args []string) {
 	}
 	rfile := resolveParam("r", "rfile", *rfileShort, *rfileLong, "")
 	lfile := resolveParam("l", "lfile", *lfileShort, *lfileLong, "")
-	
+
 	// 验证必填参数
 	if server == "" {
 		log.Fatal("Please specify the server address (-s or --server)")
@@ -524,10 +524,10 @@ func handleDownloadCommand(args []string) {
 	if rfile == "" {
 		log.Fatal("Please specify remote file path (-r or --rfile)")
 	}
-	
+
 	// 构建服务器地址
 	serverAddr := fmt.Sprintf("%s:%d", server, port)
-	
+
 	// 执行下载
 	if err := clientDownload(serverAddr, rfile, lfile); err != nil {
 		log.Fatalf("Download failed: %v", err)
